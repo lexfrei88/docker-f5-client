@@ -4,7 +4,9 @@ CONTAINER_NAME="f5fpc-vpn"
 F5FPC_ARGS=""
 VPNHOST=""
 USERNAME=""
+PASSWORD=""
 keep_running=1
+NETWORKS=()
 
 for cmd in docker ip ; do
 	which "$cmd" > /dev/null 2> /dev/null
@@ -94,6 +96,7 @@ start_client() {
 		--net host \
 		-e VPNHOST="$VPNHOST" \
 		-e USERNAME="$USERNAME" \
+		-e PASSWORD="$PASSWORD" \
 		matthiaslohr/f5fpc \
 		/opt/idle.sh > /dev/null
 	if [ "$?" != 0 ] ; then
@@ -110,6 +113,7 @@ start_gateway() {
 		--sysctl net.ipv4.ip_forward=1 \
 		-e VPNHOST="$VPNHOST" \
 		-e USERNAME="$USERNAME" \
+		-e PASSWORD="$PASSWORD" \
 		matthiaslohr/f5fpc \
 		/opt/idle.sh > /dev/null
 	if [ "$?" != 0 ] ; then
@@ -128,6 +132,7 @@ stop_vpn() {
 	echo "Shutting down..."
 	dockerip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
         for network in ${NETWORKS[@]} ; do
+                echo $network
                 ip route del $network via $dockerip
         done
 	docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
@@ -135,9 +140,19 @@ stop_vpn() {
 	exit
 }
 
+read_routes() {
+    if [ ! -f ./routes-config.txt ]; then
+        echo No routes created. 'routes-config.txt' does not exists.
+    else
+        readarray -t NETWORKS < ./routes-config.txt
+        #for route in "${routes[@]}"; do
+        #    echo Value: "$route"
+        #done
+    fi
+}
+
 # read CLI parameters
 POSITIONAL=()
-NETWORKS=()
 while [ $# -gt 0 ] ; do
 	case $1 in
 		-h|--help)
@@ -155,8 +170,8 @@ while [ $# -gt 0 ] ; do
 			shift
 			shift
 			;;
-		-n|--network)
-			NETWORKS+=("$2")
+		-p|--password)
+			PASSWORD="$2"
 			shift
 			shift
 			;;
