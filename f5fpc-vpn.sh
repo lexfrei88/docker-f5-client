@@ -153,6 +153,7 @@ read_routes() {
 
 # read CLI parameters
 POSITIONAL=()
+read_routes
 while [ $# -gt 0 ] ; do
 	case $1 in
 		-h|--help)
