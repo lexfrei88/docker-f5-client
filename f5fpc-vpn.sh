@@ -1,5 +1,6 @@
 #!/bin/bash
 
+F5FPC_HOME='/home/alex/DevOps/docker-f5fpc'
 CONTAINER_NAME="f5fpc-vpn"
 F5FPC_ARGS=""
 VPNHOST=""
@@ -57,6 +58,10 @@ observe_f5fpc() {
 			5)
 				if [ "$last_result" != "5" ] ; then
 					echo "Connection established successfully"
+	                dockerip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
+	                for network in ${NETWORKS[@]} ; do
+		                sudo ip route add $network via $dockerip
+	                done
 				fi
 				;;
 			7)
@@ -121,10 +126,6 @@ start_gateway() {
 		exit 1
 	fi
 	docker exec -it "$CONTAINER_NAME" /opt/connect.sh
-	dockerip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
-	for network in ${NETWORKS[@]} ; do
-		ip route add $network via $dockerip
-	done
 	observe_f5fpc
 }
 
@@ -132,7 +133,6 @@ stop_vpn() {
 	echo "Shutting down..."
 	dockerip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
         for network in ${NETWORKS[@]} ; do
-                echo $network
                 ip route del $network via $dockerip
         done
 	docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
@@ -141,13 +141,10 @@ stop_vpn() {
 }
 
 read_routes() {
-    if [ ! -f ./routes-config.txt ]; then
-        echo No routes created. 'routes-config.txt' does not exists.
+    if [ ! -f $F5FPC_HOME/routes-config.txt ]; then
+        echo No routes created. '$F5FPC_HOME/routes-config.txt' does not exists.
     else
-        readarray -t NETWORKS < ./routes-config.txt
-        #for route in "${routes[@]}"; do
-        #    echo Value: "$route"
-        #done
+        readarray -t NETWORKS < $F5FPC_HOME/routes-config.txt
     fi
 }
 
