@@ -143,9 +143,14 @@ stop_vpn() {
 
 read_routes() {
     if [ ! -f $F5FPC_HOME/routes.config ]; then
-        echo No routes created. '$F5FPC_HOME/routes.config' does not exists.
+        echo No routes created. $F5FPC_HOME/routes.config does not exists.
     else
-        readarray -t NETWORKS < $F5FPC_HOME/routes.config
+        readarray -t routes < $F5FPC_HOME/routes.config
+        for route in ${routes[@]}; do
+            if [[ $route =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$ ]]; then
+                NETWORKS+=("$route")
+            fi
+        done
     fi
 }
 
