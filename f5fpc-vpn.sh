@@ -2,6 +2,7 @@
 
 F5FPC_HOME='/home/alex/DevOps/docker-f5fpc'
 CONTAINER_NAME="f5fpc-vpn"
+IMAGE_NAME="f5fpc-vpn-image"
 F5FPC_ARGS=""
 VPNHOST=""
 USERNAME=""
@@ -102,7 +103,7 @@ start_client() {
 		-e VPNHOST="$VPNHOST" \
 		-e USERNAME="$USERNAME" \
 		-e PASSWORD="$PASSWORD" \
-		matthiaslohr/f5fpc \
+		$IMAGE_NAME \
 		/opt/idle.sh > /dev/null
 	if [ "$?" != 0 ] ; then
 		echo "Error starting docker container."
@@ -119,7 +120,7 @@ start_gateway() {
 		-e VPNHOST="$VPNHOST" \
 		-e USERNAME="$USERNAME" \
 		-e PASSWORD="$PASSWORD" \
-		matthiaslohr/f5fpc \
+		$IMAGE_NAME \
 		/opt/idle.sh > /dev/null
 	if [ "$?" != 0 ] ; then
 		echo "Error starting docker container."
@@ -141,10 +142,17 @@ stop_vpn() {
 }
 
 read_routes() {
-    if [ ! -f $F5FPC_HOME/routes-config.txt ]; then
-        echo No routes created. '$F5FPC_HOME/routes-config.txt' does not exists.
+    if [ ! -f $F5FPC_HOME/routes.config ]; then
+        echo No routes created. '$F5FPC_HOME/routes.config' does not exists.
     else
-        readarray -t NETWORKS < $F5FPC_HOME/routes-config.txt
+        readarray -t NETWORKS < $F5FPC_HOME/routes.config
+    fi
+}
+
+docker_image() {
+    imageid=$(docker images $IMAGE_NAME -q)
+    if [ -z "$imageid" ]; then
+        docker build -t $IMAGE_NAME .
     fi
 }
 
@@ -191,6 +199,7 @@ if [ -z "$MODE" ] ;  then
 	exit 1
 fi
 
+docker_image
 case $MODE in
 	client)
 		start_client
