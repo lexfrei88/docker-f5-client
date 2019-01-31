@@ -24,51 +24,24 @@ The docker image allows two operating modes:
 
 ## Start F5 VPN client
 
-### VPN client mode (quick)
-
-You don't need to clone this repository.
-Just start the Docker container with the following command:
-```
-docker run --name f5fpc-vpn --net host -it --rm --privileged matthiaslohr/f5fpc /opt/connect.sh
-```
-
-You can check status with:
-```
-f5fpc -i
-```
-
-Disconnect:
-```
-f5fpc -o
-```
-
-
-### VPN client mode (helper script)
-
-Clone this repository to your favourite place and ```cd``` into the directory.
-
-Run
-```
-./f5fpc-vpn.sh client
-```
-
-
 ### Gateway mode
 
 Clone this repository to your favourite place and ```cd``` into the directory.
 
+Auto route setup for connecting to a VPN network (needs root add/remove routes):
+Add routes in CIDR notation in routes.config files. 
 Run
 ```
-./f5fpc-vpn.sh gateway
-```
-
-Auto route setup for connecting to a VPN network which uses the 10.0.0.0/8 IP range (needs root add/remove routes):
-```
-sudo ./f5fpc-vpn.sh -n 10.0.0.0/8
+sudo ./f5fpc-vpn.sh gateway --host https://connectwdf11.sap.com --user <C-user> --password <RSA-passcode>
 ```
 
 For more information and options see
 ```
 ./f5fpc-vpn.sh -h
 ```
+
+### Known issues
+
+Seems like some of the SAP URL could not be resolved with usual DNS servers, so you need to add them into hosts file
+to be able to open them in browser. For example on linux add `10.67.76.20     github.wdf.sap.corp` in `/etc/hosts` to use SAP github
 
