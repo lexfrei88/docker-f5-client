@@ -1,1 +1,0 @@
-./f5fpc-vpn.sh gateway --host https://connectwdf11.sap.com --user <c-user> -p <pass-pin>
