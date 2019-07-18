@@ -122,7 +122,7 @@ start_gateway() {
     isexist=$(docker container ls -a -f name=$CONTAINER_NAME -q)
 	docker run --rm -d --privileged \
 		--name "$CONTAINER_NAME" \
-		--sysctl net.ipv4.ip_forward=1 \
+		--sysctl net.ipv4.conf.all.forwarding=1 \
 		-e VPNHOST="$VPNHOST" \
 		-e USERNAME="$USERNAME" \
 		-e PASSWORD="$PASSWORD" \
@@ -143,8 +143,11 @@ stop_vpn() {
             ip route del $network via $DOCKER_IP > /dev/null 2>&1
         done
     fi
-	docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
-	docker stop "$CONTAINER_NAME" > /dev/null 2>&1
+    docker inspect -f='{{.Id}}' ${CONTAINER_NAME} 
+    if [[ $? == 0 ]]; then
+	    docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
+	    docker stop "$CONTAINER_NAME" > /dev/null 2>&1
+    fi
 	if [[ "${#DNS_ADDRESSES[@]}" -gt 0 ]]; then
 	    for dns in ${DNS_ADDRESSES[@]} ; do
             sudo sed -i "/nameserver $dns/d" /etc/resolvconf/resolv.conf.d/head
@@ -222,7 +225,7 @@ done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 # start vpn connection
-trap stop_vpn INT EXIT
+trap stop_vpn EXIT INT
 MODE="$1"
 
 if [ -z "$MODE" ] ;  then
