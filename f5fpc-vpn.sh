@@ -143,7 +143,7 @@ stop_vpn() {
             ip route del $network via $DOCKER_IP > /dev/null 2>&1
         done
     fi
-    docker inspect -f='{{.Id}}' ${CONTAINER_NAME} 
+    docker inspect -f='{{.Id}}' ${CONTAINER_NAME} > /dev/null 2>&1
     if [[ $? == 0 ]]; then
 	    docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
 	    docker stop "$CONTAINER_NAME" > /dev/null 2>&1
