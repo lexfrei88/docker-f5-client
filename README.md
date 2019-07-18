@@ -14,6 +14,10 @@ The docker image allows two operating modes:
 * Install Docker. **Important:** Do **not** use the packages provided by your
   distribution packages sources.
   Use the officical resources from docker: https://docs.docker.com/engine/installation/.
+* Install `resolvconf` (if this tools is not already installed). For ubuntu you can use: 
+```
+sudo apt install resolvconf
+```
 
 
 ### Mac
@@ -39,9 +43,4 @@ For more information and options see
 ```
 ./f5fpc-vpn.sh -h
 ```
-
-### Known issues
-
-Seems like some of the SAP URL could not be resolved with usual DNS servers, so you need to add them into hosts file
-to be able to open them in browser. For example on linux add `10.67.76.20     github.wdf.sap.corp` in `/etc/hosts` to use SAP github
 

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-F5FPC_HOME='/home/alex/DevOps/docker-f5fpc'
+F5FPC_HOME="/home/alex/DevOps/docker-f5fpc"
 CONTAINER_NAME="f5fpc-vpn"
 IMAGE_NAME="f5fpc-vpn-image"
 F5FPC_ARGS=""
@@ -9,6 +9,8 @@ USERNAME=""
 PASSWORD=""
 keep_running=1
 NETWORKS=()
+DNS_ADDRESSES=()
+DOCKER_IP=''
 
 for cmd in docker ip ; do
 	which "$cmd" > /dev/null 2> /dev/null
@@ -30,6 +32,7 @@ Supported parameters:
   -h --help	Show this help text
   -t --host     VPN host
   -u --user     VPN username
+  -p --pascode  VPN RSA token
 EOF
 }
 
@@ -59,24 +62,26 @@ observe_f5fpc() {
 			5)
 				if [ "$last_result" != "5" ] ; then
 					echo "Connection established successfully"
-	                dockerip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
+	                DOCKER_IP=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
 	                for network in ${NETWORKS[@]} ; do
-		                sudo ip route add $network via $dockerip
+		                sudo ip route add $network via $DOCKER_IP> /dev/null 2>&1
 	                done
+                    if [[ "${#DNS_ADDRESSES[@]}" -gt 0 ]]; then
+	                for dns in ${DNS_ADDRESSES[@]} ; do
+                        echo "nameserver $dns" | sudo tee -a /etc/resolvconf/resolv.conf.d/head
+	                done
+                    sudo resolvconf -u
+                    fi
 				fi
 				;;
 			7)
 				echo "Logon denied"
 				echo "$output"
-				echo "Shutting down..."
-				docker stop "$CONTAINER_NAME"
 				echo ""
 				exit
 				;;
 			9)
 				echo "Connection timed out"
-				echo "Shutting down..."
-				docker stop "$CONTAINER_NAME"
 				echo ""
 				exit
 				;;
@@ -114,9 +119,10 @@ start_client() {
 }
 
 start_gateway() {
-	docker run -d --rm --privileged \
+    isexist=$(docker container ls -a -f name=$CONTAINER_NAME -q)
+	docker run --rm -d --privileged \
 		--name "$CONTAINER_NAME" \
-		--sysctl net.ipv4.ip_forward=1 \
+		--sysctl net.ipv4.conf.all.forwarding=1 \
 		-e VPNHOST="$VPNHOST" \
 		-e USERNAME="$USERNAME" \
 		-e PASSWORD="$PASSWORD" \
@@ -132,13 +138,23 @@ start_gateway() {
 
 stop_vpn() {
 	echo "Shutting down..."
-	dockerip=`docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME`
+    if [[ -n $DOCKER_IP ]]; then
         for network in ${NETWORKS[@]} ; do
-                ip route del $network via $dockerip
+            ip route del $network via $DOCKER_IP > /dev/null 2>&1
         done
-	docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
-	docker stop "$CONTAINER_NAME"
-	exit
+    fi
+    docker inspect -f='{{.Id}}' ${CONTAINER_NAME} > /dev/null 2>&1
+    if [[ $? == 0 ]]; then
+	    docker exec "$CONTAINER_NAME" /usr/local/bin/f5fpc -o > /dev/null
+	    docker stop "$CONTAINER_NAME" > /dev/null 2>&1
+    fi
+	if [[ "${#DNS_ADDRESSES[@]}" -gt 0 ]]; then
+	    for dns in ${DNS_ADDRESSES[@]} ; do
+            sudo sed -i "/nameserver $dns/d" /etc/resolvconf/resolv.conf.d/head
+	    done
+        sudo resolvconf -u
+    fi
+    exit
 }
 
 read_routes() {
@@ -154,6 +170,19 @@ read_routes() {
     fi
 }
 
+read_dns() {
+    if [ ! -f $F5FPC_HOME/dns.config ]; then
+        echo No DNS config created. $F5FPC_HOME/dns.config does not exists.
+    else
+        readarray -t dns_array < $F5FPC_HOME/dns.config
+        for dns in ${dns_array[@]}; do
+            if [[ $dns =~ ^([0-9]{1,3}\.){3}[0-9]{1,3}(\/([0-9]|[1-2][0-9]|3[0-2]))?$ ]]; then
+                DNS_ADDRESSES+=("$dns")
+            fi
+        done
+    fi
+}
+
 docker_image() {
     imageid=$(docker images $IMAGE_NAME -q)
     if [ -z "$imageid" ]; then
@@ -164,6 +193,7 @@ docker_image() {
 # read CLI parameters
 POSITIONAL=()
 read_routes
+read_dns
 while [ $# -gt 0 ] ; do
 	case $1 in
 		-h|--help)
@@ -195,7 +225,7 @@ done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
 # start vpn connection
-trap stop_vpn INT
+trap stop_vpn EXIT INT
 MODE="$1"
 
 if [ -z "$MODE" ] ;  then
