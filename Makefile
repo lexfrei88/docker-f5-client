@@ -1,10 +1,10 @@
-.DEFAULT_GOAL := install
+.DEFAULT_GOAL := start 
 
-install:
+start:
 	@echo Install script to run SAP VPN...
 	@./install.sh
 
-uninstall:
+clean:
 	@echo Uninstall script to run SAP VPN...
 	@sudo rm /usr/bin/sap-vpn
 
