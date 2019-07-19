@@ -1,5 +1,10 @@
+.DEFAULT_GOAL := install
 
-.PHONY: default
+install:
+	@echo Install script to run SAP VPN...
+	@./install.sh
 
-default:
-	docker build -t matthiaslohr/f5fpc .
+uninstall:
+	@echo Uninstall script to run SAP VPN...
+	@sudo rm /usr/bin/sap-vpn
+

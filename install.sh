@@ -17,6 +17,8 @@ read -p "Enter your C/D/I-user:"
 CUSER="$REPLY"
 read -p "Enter your PIN[4 digits]:"
 PIN=$REPLY
+read -p "Enter default mode for VPN connection[client|gateway]:"
+MODE="--${REPLY}"
 CWD="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 FILE=$CWD/sap-vpn
@@ -24,7 +26,8 @@ sed -i "s,{{CWD}},$CWD,g" $FILE
 sed -i "s/{{CUSER}}/$CUSER/g" $FILE
 sed -i "s,{{HOST}},$HOST,g" $FILE
 sed -i "s/{{PIN}}/$PIN/g" $FILE
+sed -i "s/{{MODE}}/$MODE/g" $FILE
 
-chmod a+x sap-vpn
-sudo cp sap-vpn /usr/bin/ 
+chmod a+x $FILE 
+sudo cp $FILE /usr/bin/ 
 
