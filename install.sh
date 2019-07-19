@@ -18,7 +18,7 @@ CUSER="$REPLY"
 read -p "Enter your PIN[4 digits]:"
 PIN=$REPLY
 read -p "Enter default mode for VPN connection[client|gateway]:"
-MODE="--${REPLY}"
+MODE="${REPLY}"
 CWD="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 FILE=$CWD/sap-vpn
