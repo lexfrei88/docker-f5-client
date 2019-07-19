@@ -1,0 +1,36 @@
+#!/bin/bash
+
+CWD={{CWD}}
+HOST={{HOST}}
+CUSER={{CUSER}}
+PIN={{PIN}}
+MODE={{MODE}}
+
+case $1 in 
+    -c|--client) 
+        MODE='client'
+        CODE=$2
+        ;;
+    -g|--gateway)
+        MODE='gateway'
+        CODE=$2
+        ;;
+    -h|--help)
+        cat <<- EOF
+            usage: sap-vpn [{-c|-g}] <6-gigits RSA-token>
+
+            Modes:
+            -c|--client|client - the same as you connect to VPN with pure f5fpc client.
+                        All trafic goes thru VPN
+            -g|--gateway|gateway - limited mode, where you can configure trafic routes to 
+                        make use VPN only for requests that you choise.
+        EOF
+        ;;
+
+    *)
+        CODE=$1
+        ;;
+esac
+
+sudo $CWD/f5fpc-vpn.sh $MODE --host $HOST --user $CUSER --password "${PIN}${CODE}"
+
