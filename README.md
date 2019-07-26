@@ -21,18 +21,26 @@ sudo apt install resolvconf
 
 ## Start F5 VPN client
 
-### Gateway mode
-
+### Install
 Clone this repository to your favourite place and ```cd``` into this directory.
-
-Add routes in CIDR notation in _routes.config_ files to let traffic to this ip's go through the VPN. 
-(This step is optional if you don't want to use 'gateway' mode and going to use 'clinet' mode.)
 
 Run ```sudo ./install.sh``` script that help you to configure tool and prepare it to use. 
 
 After installation use ```sap-vpn --help``` to see if tool was installed correctly and ready to use.
 
+### Mode
+#### Gateway
+
+Add routes in CIDR notation in _routes.config_ files to let traffic to this ip's go through the VPN. 
+(This step is optional if you don't want to use 'gateway' mode and going to use 'clinet' mode.)
+#### Client
+
+Nothing special need to be done.
+
+### Run
+
 Run SAP VPN:
 ```
 sap-vpn <6-digits PIN>
 ```
+
