@@ -19,28 +19,20 @@ The docker image allows two operating modes:
 sudo apt install resolvconf
 ```
 
-
-### Mac
-
-* If you want to use the gateway mode:
-  For automatic route setup on Mac you need to install ```iproute2mac``` via homebrew.
-
-
 ## Start F5 VPN client
 
 ### Gateway mode
 
-Clone this repository to your favourite place and ```cd``` into the directory.
+Clone this repository to your favourite place and ```cd``` into this directory.
 
-Auto route setup for connecting to a VPN network (needs root add/remove routes):
-Add routes in CIDR notation in routes.config files. 
-Run
-```
-sudo ./f5fpc-vpn.sh gateway --host https://connectwdf11.sap.com --user <C-user> --password <RSA-passcode>
-```
+Add routes in CIDR notation in _routes.config_ files to let traffic to this ip's go through the VPN. 
+Previouse step is optional if you don't want to use 'gateway' mode and going to use 'clinet' mode.
 
-For more information and options see
-```
-./f5fpc-vpn.sh -h
-```
+Run ```sudo ./install.sh``` script that help you to configure tool and prepare it to use. 
 
+After installation use ```sap-vpn --help``` to see if tool was installed correctly and ready to use.
+
+Run SAP VPN:
+```
+sap-vpn <6-digits PIN>
+```

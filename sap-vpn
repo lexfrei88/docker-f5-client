@@ -1,10 +1,10 @@
 #!/bin/bash
 
-CWD={{CWD}}
-HOST={{HOST}}
-CUSER={{CUSER}}
-PIN={{PIN}}
-MODE={{MODE}}
+CWD=/home/alex/DevOps/docker-f5fpc
+HOST=https://connectwdf11.sap.com
+CUSER=c5281640
+PIN=1988
+MODE=gateway
 
 case $1 in 
     -c|--client) 
@@ -17,14 +17,21 @@ case $1 in
         ;;
     -h|--help)
         cat <<- EOF
-            usage: sap-vpn [{-c|-g}] <6-gigits RSA-token>
+Usage: sap-vpn [{-c|-g}] <6-gigits RSA-token>
 
-            Modes:
-            -c|--client|client - the same as you connect to VPN with pure f5fpc client.
-                        All trafic goes thru VPN
-            -g|--gateway|gateway - limited mode, where you can configure trafic routes to 
-                        make use VPN only for requests that you choise.
-        EOF
+Modes:
+    -c|--client -   the same as you connect to VPN with pure f5fpc client.
+                    All trafic goes thru VPN
+    -g|--gateway -  limited mode, where you can configure traffic with routes to 
+                    make use VPN only for requests that you choise.
+Default values:
+dir:    $CWD
+host:   $HOST
+user:   $CUSER
+pin:    $PIN
+mode:   $MODE
+EOF
+        exit 0
         ;;
 
     *)
