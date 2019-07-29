@@ -5,9 +5,9 @@ CWD="$(cd -P -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd -P)"
 
 if [[ -f /usr/bin/sap-vpn ]]; then
     echo Already insatlled.
-    read -p 'Would you like to change configuration?'
-    if [[ $REPLY =~ '[y|Y|([y|Y]es)]' ]]; then
-        git -C $CWD checkout -f master
+    read -p 'Would you like to change configuration? '
+    if [[ $REPLY =~ ^([yY][eE][sS]|[yY])+$ ]]; then
+        git -C $CWD checkout -f -q master
     else
         exit 0
     fi
