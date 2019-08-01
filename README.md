@@ -19,7 +19,7 @@ The docker image allows two operating modes:
 sudo apt install resolvconf
 ```
 
-## Start F5 VPN client
+## Use F5 VPN client in context of SAP VPN
 
 ### Install
 Clone this repository to your favourite place and ```cd``` into this directory.
