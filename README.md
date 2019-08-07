@@ -29,18 +29,18 @@ Run ```sudo ./install.sh``` script that help you to configure tool and prepare i
 After installation use ```sap-vpn --help``` to see if tool was installed correctly and ready to use.
 
 ### Mode
+#### Client
+
+_Recommend to use this mode if you are not familiar with static routing._ Nothing special need to be done.
 #### Gateway
 
 Add routes in CIDR notation in _routes.config_ files to let traffic to this ip's go through the VPN. 
 (This step is optional if you don't want to use 'gateway' mode and going to use 'clinet' mode.)
-#### Client
-
-Nothing special need to be done.
 
 ### Run
 
 Run SAP VPN:
 ```
-sap-vpn <6-digits PIN>
+sap-vpn <6-digits token>
 ```
 
